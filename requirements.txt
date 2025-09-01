@@ -1,0 +1,15 @@
+# Core HTML parsing
+beautifulsoup4>=4.9.0
+lxml>=4.6.0
+
+# Markdown conversion
+markdownify>=0.11.0
+
+# Boilerplate removal
+readability-lxml>=0.8.0
+
+# Language detection
+langdetect>=1.0.9
+
+# HTTP requests for URL fetching
+requests>=2.25.0

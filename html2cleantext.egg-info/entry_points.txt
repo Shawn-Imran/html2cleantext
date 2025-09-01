@@ -1,0 +1,2 @@
+[console_scripts]
+html2cleantext = html2cleantext.cli:main

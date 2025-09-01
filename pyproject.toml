@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "html2cleantext"
+version = "0.1.0"
+description = "Convert HTML to clean, structured Markdown or plain text"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Markup :: HTML",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "beautifulsoup4>=4.9.0",
+    "lxml>=4.6.0",
+    "markdownify>=0.11.0",
+    "readability-lxml>=0.8.0",
+    "langdetect>=1.0.9",
+    "requests>=2.25.0",
+]
+keywords = ["html", "markdown", "text", "cleaning", "boilerplate", "nlp"]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/html2cleantext"
+"Bug Reports" = "https://github.com/yourusername/html2cleantext/issues"
+Source = "https://github.com/yourusername/html2cleantext"
+
+[project.scripts]
+html2cleantext = "html2cleantext.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["html2cleantext*"]
