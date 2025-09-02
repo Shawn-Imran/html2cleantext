@@ -8,7 +8,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="html2cleantext",
-    version="0.1.0",
+    version="0.1.1",
     author="Md Al Mahmud Imran",
     author_email="md.almahmudimran@gmail.com",
     description="Convert HTML to clean, structured Markdown or plain text",
