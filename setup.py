@@ -9,16 +9,17 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 setup(
     name="html2cleantext",
     version="0.1.0",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="Md Al Mahmud Imran",
+    author_email="md.almahmudimran@gmail.com",
     description="Convert HTML to clean, structured Markdown or plain text",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/html2cleantext",
+    url="https://github.com/Shawn-Imran/html2cleantext",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
@@ -31,7 +32,6 @@ setup(
         "Topic :: Text Processing :: Markup :: HTML",
         "Topic :: Text Processing :: Markup :: Markdown",
     ],
-    python_requires=">=3.7",
     install_requires=requirements,
     extras_require={
         "dev": [
@@ -49,7 +49,7 @@ setup(
     },
     keywords="html markdown text cleaning boilerplate nlp",
     project_urls={
-        "Bug Reports": "https://github.com/yourusername/html2cleantext/issues",
-        "Source": "https://github.com/yourusername/html2cleantext",
+        "Bug Reports": "https://github.com/Shawn-Imran/html2cleantext/issues",
+        "Source": "https://github.com/Shawn-Imran/html2cleantext",
     },
 )

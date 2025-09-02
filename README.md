@@ -21,7 +21,7 @@ pip install html2cleantext
 Or install from source:
 
 ```bash
-git clone https://github.com/yourusername/html2cleantext.git
+git clone https://github.com/Shawn-Imran/html2cleantext.git
 cd html2cleantext
 pip install -e .
 ```
@@ -245,7 +245,7 @@ Contributions are welcome! Please feel free to submit issues, feature requests, 
 ### Development Setup
 
 ```bash
-git clone https://github.com/yourusername/html2cleantext.git
+git clone https://github.com/Shawn-Imran/html2cleantext.git
 cd html2cleantext
 pip install -e .[dev]  # Install with development dependencies
 # OR

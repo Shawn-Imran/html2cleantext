@@ -230,6 +230,8 @@ source test_env/bin/activate
 
 # Install from TestPyPI
 pip install -i https://test.pypi.org/simple/ html2cleantext
+# Or,
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple html2cleantext
 
 # Test it works
 python -c "import html2cleantext; print(html2cleantext.__version__)"

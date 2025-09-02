@@ -8,8 +8,8 @@ boilerplate removal, language-specific normalization, and flexible output format
 from .core import to_markdown, to_text
 
 __version__ = "0.1.0"
-__author__ = "Your Name"
-__email__ = "your.email@example.com"
+__author__ = "Md Al Mahmud Imran"
+__email__ = "md.almahmudimran@gmail.com"
 
 # Expose the main API functions
 __all__ = ["to_markdown", "to_text"]

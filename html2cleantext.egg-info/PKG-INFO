@@ -2,13 +2,13 @@ Metadata-Version: 2.4
 Name: html2cleantext
 Version: 0.1.0
 Summary: Convert HTML to clean, structured Markdown or plain text
-Home-page: https://github.com/yourusername/html2cleantext
-Author: Your Name
-Author-email: Your Name <your.email@example.com>
+Home-page: https://github.com/Shawn-Imran/html2cleantext
+Author: Md Al Mahmud Imran
+Author-email: Md Al Mahmud Imran <md.almahmudimran@gmail.com>
 License: MIT
-Project-URL: Homepage, https://github.com/yourusername/html2cleantext
-Project-URL: Bug Reports, https://github.com/yourusername/html2cleantext/issues
-Project-URL: Source, https://github.com/yourusername/html2cleantext
+Project-URL: Homepage, https://github.com/Shawn-Imran/html2cleantext
+Project-URL: Bug Reports, https://github.com/Shawn-Imran/html2cleantext/issues
+Project-URL: Source, https://github.com/Shawn-Imran/html2cleantext
 Keywords: html,markdown,text,cleaning,boilerplate,nlp
 Classifier: Development Status :: 3 - Alpha
 Classifier: Intended Audience :: Developers
@@ -35,7 +35,6 @@ Requires-Dist: requests>=2.25.0
 Dynamic: author
 Dynamic: home-page
 Dynamic: license-file
-Dynamic: requires-python
 
 # html2cleantext
 
@@ -60,7 +59,7 @@ pip install html2cleantext
 Or install from source:
 
 ```bash
-git clone https://github.com/yourusername/html2cleantext.git
+git clone https://github.com/Shawn-Imran/html2cleantext.git
 cd html2cleantext
 pip install -e .
 ```
@@ -284,7 +283,7 @@ Contributions are welcome! Please feel free to submit issues, feature requests, 
 ### Development Setup
 
 ```bash
-git clone https://github.com/yourusername/html2cleantext.git
+git clone https://github.com/Shawn-Imran/html2cleantext.git
 cd html2cleantext
 pip install -e .[dev]  # Install with development dependencies
 # OR

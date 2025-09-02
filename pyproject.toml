@@ -9,7 +9,7 @@ description = "Convert HTML to clean, structured Markdown or plain text"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "Md Al Mahmud Imran", email = "md.almahmudimran@gmail.com"}
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -38,9 +38,9 @@ dependencies = [
 keywords = ["html", "markdown", "text", "cleaning", "boilerplate", "nlp"]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/html2cleantext"
-"Bug Reports" = "https://github.com/yourusername/html2cleantext/issues"
-Source = "https://github.com/yourusername/html2cleantext"
+Homepage = "https://github.com/Shawn-Imran/html2cleantext"
+"Bug Reports" = "https://github.com/Shawn-Imran/html2cleantext/issues"
+Source = "https://github.com/Shawn-Imran/html2cleantext"
 
 [project.scripts]
 html2cleantext = "html2cleantext.cli:main"

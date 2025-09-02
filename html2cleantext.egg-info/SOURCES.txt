@@ -1,6 +1,8 @@
 LICENSE
+MANIFEST.in
 README.md
 pyproject.toml
+requirements.txt
 setup.py
 html2cleantext/__init__.py
 html2cleantext/cleaners.py
