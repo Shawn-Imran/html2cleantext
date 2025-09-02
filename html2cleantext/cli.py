@@ -90,14 +90,14 @@ def main() -> None:
     )
     
     parser.add_argument(
-        '--strip-boilerplate',
+        '--remove_boilerplate',
         action='store_true',
         default=True,
         help='Remove navigation, footers, and boilerplate content (default: enabled)'
     )
     
     parser.add_argument(
-        '--no-strip-boilerplate',
+        '--no-remove_boilerplate',
         action='store_true',
         help='Keep all content including navigation and footers'
     )
@@ -131,7 +131,7 @@ def main() -> None:
         # Determine link and image options based on mode and flags
         keep_links = _determine_keep_links(args)
         keep_images = _determine_keep_images(args)
-        remove_boilerplate = not args.no_strip_boilerplate
+        remove_boilerplate = not args.no_remove_boilerplate
         normalize_lang = not args.no_normalize
         
         # Convert HTML

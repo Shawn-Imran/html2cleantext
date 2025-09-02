@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: html2cleantext
-Version: 0.1.1
+Version: 0.1.2
 Summary: Convert HTML to clean, structured Markdown or plain text
 Home-page: https://github.com/Shawn-Imran/html2cleantext
 Author: Md Al Mahmud Imran
@@ -87,7 +87,7 @@ clean_text = html2cleantext.to_text(
     html,
     keep_links=False,
     keep_images=False,
-    strip_boilerplate=True
+    remove_boilerplate=True
 )
 ```
 
@@ -107,7 +107,7 @@ html2cleantext https://example.com --output clean.md
 html2cleantext input.html --no-links --no-images
 
 # Keep all content (no boilerplate removal)
-html2cleantext input.html --no-strip-boilerplate
+html2cleantext input.html --no-remove_boilerplate
 ```
 
 ## API Reference
@@ -122,7 +122,7 @@ Convert HTML to clean Markdown format.
 - `html_input` (str|Path): HTML string, file path, or URL
 - `keep_links` (bool): Preserve links (default: True)
 - `keep_images` (bool): Preserve images (default: True)
-- `strip_boilerplate` (bool): Remove boilerplate content (default: True)
+- `remove_boilerplate` (bool): Remove boilerplate content (default: True)
 - `normalize_lang` (bool): Apply language normalization (default: True)
 - `language` (str, optional): Language code for normalization (auto-detected if None)
 
@@ -156,8 +156,8 @@ optional arguments:
   --no-links            Remove links from the output
   --keep-images         Preserve images in the output
   --no-images           Remove images from the output
-  --strip-boilerplate   Remove navigation, footers, and boilerplate content
-  --no-strip-boilerplate
+  --remove_boilerplate   Remove navigation, footers, and boilerplate content
+  --no-remove_boilerplate
                         Keep all content including navigation and footers
   --language LANGUAGE, -l LANGUAGE
                         Language code for normalization
@@ -208,6 +208,7 @@ This is the main content with a [link](https://example.com).
 ### Advanced Usage
 
 ```python
+import html2cleantext
 # Process a Bengali webpage
 bengali_html = "<p>এই একটি বাংলা বাক্য।</p>"
 clean_text = html2cleantext.to_text(
@@ -238,7 +239,7 @@ html2cleantext https://news.example.com/article --output article.md
 html2cleantext complex.html --mode text --no-links --no-images
 
 # Preserve all content (no cleaning)
-html2cleantext raw.html --no-strip-boilerplate --output raw_content.md
+html2cleantext raw.html --no-remove_boilerplate --output raw_content.md
 
 # Bengali content with specific language
 html2cleantext bengali.html --language bn --mode text
