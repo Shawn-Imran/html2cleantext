@@ -33,6 +33,15 @@ setup(
     ],
     python_requires=">=3.7",
     install_requires=requirements,
+    extras_require={
+        "dev": [
+            "pytest>=7.0.0",
+            "pytest-cov>=4.0.0",
+        ],
+        "test": [
+            "pytest>=7.0.0",
+        ],
+    },
     entry_points={
         "console_scripts": [
             "html2cleantext=html2cleantext.cli:main",

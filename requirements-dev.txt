@@ -1,0 +1,12 @@
+# Development and testing dependencies
+pytest>=7.0.0
+pytest-cov>=4.0.0  # For coverage reports
+
+# Code quality tools (optional)
+black>=22.0.0       # Code formatter
+flake8>=5.0.0       # Linter
+mypy>=0.991         # Type checker
+
+# Documentation tools (optional)
+sphinx>=5.0.0       # Documentation generator
+sphinx-rtd-theme>=1.0.0  # Read the Docs theme

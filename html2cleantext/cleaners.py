@@ -247,6 +247,87 @@ def _general_normalization(text: str) -> str:
     return text.strip()
 
 
+def replace_images_with_text(soup: BeautifulSoup) -> BeautifulSoup:
+    """
+    Replace images with text placeholders containing the alt text and src URL.
+    This preserves image information in plain text format when keep_images=True.
+    
+    Args:
+        soup (BeautifulSoup): Parsed HTML document
+        
+    Returns:
+        BeautifulSoup: Modified soup with images replaced by text placeholders
+    """
+    # Replace img tags with text placeholders
+    for img in soup.find_all('img'):
+        # Get image information
+        src = img.get('src', '')
+        alt = img.get('alt', '')
+        title = img.get('title', '')
+        
+        # Create text representation
+        if alt and title:
+            image_text = f"[IMAGE: {alt} ({title}) - {src}]"
+        elif alt:
+            image_text = f"[IMAGE: {alt} - {src}]"
+        elif title:
+            image_text = f"[IMAGE: {title} - {src}]"
+        else:
+            image_text = f"[IMAGE: {src}]"
+        
+        # Replace the img tag with the text
+        img.replace_with(image_text)
+    
+    # Handle picture tags and their content
+    for picture in soup.find_all('picture'):
+        # Try to find the main image source
+        img_tag = picture.find('img')
+        if img_tag:
+            src = img_tag.get('src', '')
+            alt = img_tag.get('alt', '')
+            title = img_tag.get('title', '')
+            
+            if alt and title:
+                image_text = f"[IMAGE: {alt} ({title}) - {src}]"
+            elif alt:
+                image_text = f"[IMAGE: {alt} - {src}]"
+            elif title:
+                image_text = f"[IMAGE: {title} - {src}]"
+            else:
+                image_text = f"[IMAGE: {src}]"
+            
+            picture.replace_with(image_text)
+        else:
+            # Fallback if no img tag found
+            picture.replace_with("[IMAGE: picture element]")
+    
+    # Handle figure tags that contain images
+    for figure in soup.find_all('figure'):
+        img_tag = figure.find('img')
+        if img_tag:
+            src = img_tag.get('src', '')
+            alt = img_tag.get('alt', '')
+            title = img_tag.get('title', '')
+            
+            # Check for figcaption
+            caption = figure.find('figcaption')
+            if caption:
+                caption_text = caption.get_text().strip()
+                image_text = f"[IMAGE: {caption_text} - {src}]"
+            elif alt and title:
+                image_text = f"[IMAGE: {alt} ({title}) - {src}]"
+            elif alt:
+                image_text = f"[IMAGE: {alt} - {src}]"
+            elif title:
+                image_text = f"[IMAGE: {title} - {src}]"
+            else:
+                image_text = f"[IMAGE: {src}]"
+            
+            figure.replace_with(image_text)
+    
+    return soup
+
+
 def clean_html_attributes(soup: BeautifulSoup) -> BeautifulSoup:
     """
     Remove unnecessary HTML attributes and inline styles.

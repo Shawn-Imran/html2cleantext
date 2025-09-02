@@ -14,7 +14,8 @@ from .cleaners import (
     remove_images, 
     strip_boilerplate, 
     normalize_language,
-    clean_html_attributes
+    clean_html_attributes,
+    replace_images_with_text
 )
 
 logger = logging.getLogger(__name__)
@@ -126,7 +127,12 @@ def to_text(
     if not keep_links:
         soup = remove_links(soup)
     
-    if not keep_images:
+    # FIXED: Handle images properly based on keep_images flag
+    if keep_images:
+        # Replace images with text placeholders instead of removing them
+        soup = replace_images_with_text(soup)
+    else:
+        # Remove images completely
         soup = remove_images(soup)
     
     # Extract text content

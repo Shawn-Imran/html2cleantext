@@ -25,6 +25,7 @@ Classifier: Topic :: Text Processing :: Markup :: HTML
 Classifier: Topic :: Text Processing :: Markup :: Markdown
 Requires-Python: >=3.7
 Description-Content-Type: text/markdown
+License-File: LICENSE
 Requires-Dist: beautifulsoup4>=4.9.0
 Requires-Dist: lxml>=4.6.0
 Requires-Dist: markdownify>=0.11.0
@@ -33,6 +34,7 @@ Requires-Dist: langdetect>=1.0.9
 Requires-Dist: requests>=2.25.0
 Dynamic: author
 Dynamic: home-page
+Dynamic: license-file
 Dynamic: requires-python
 
 # html2cleantext
@@ -284,8 +286,10 @@ Contributions are welcome! Please feel free to submit issues, feature requests, 
 ```bash
 git clone https://github.com/yourusername/html2cleantext.git
 cd html2cleantext
-pip install -e .
-pip install -r requirements-dev.txt  # If you create this for dev dependencies
+pip install -e .[dev]  # Install with development dependencies
+# OR
+pip install -e .  # Install package only
+pip install -r requirements-dev.txt  # Install dev dependencies separately
 ```
 
 ### Running Tests

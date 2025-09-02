@@ -247,8 +247,10 @@ Contributions are welcome! Please feel free to submit issues, feature requests, 
 ```bash
 git clone https://github.com/yourusername/html2cleantext.git
 cd html2cleantext
-pip install -e .
-pip install -r requirements-dev.txt  # If you create this for dev dependencies
+pip install -e .[dev]  # Install with development dependencies
+# OR
+pip install -e .  # Install package only
+pip install -r requirements-dev.txt  # Install dev dependencies separately
 ```
 
 ### Running Tests
