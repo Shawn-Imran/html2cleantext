@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "html2cleantext"
-version = "0.1.3"
+version = "0.1.4"
 description = "Convert HTML to clean, structured Markdown or plain text"
 readme = "README.md"
 license = {text = "MIT"}
