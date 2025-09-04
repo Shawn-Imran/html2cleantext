@@ -11,6 +11,15 @@ from .utils import detect_language
 
 logger = logging.getLogger(__name__)
 
+CURRENCY_SYMBOLS_AND_CODES = [
+    # Common currency symbols
+    "€", "$", "£", "¥", "₹", "₽", "₩", "₺", "₫", "฿", "₴", "₦", "₲", "₡", "₵", "₸", "₭", "₠", "₢", "₳", "₥", "₧", "₯", "₰", "₱", "₲", "₳", "₴", "₵", "₸", "₺", "₼", "₾", "₿", "៛", "₪", "₠", "₡", "₢", "₣", "₤", "₥", "₦", "₧", "₨", "₩", "₪", "₫", "₭", "₮", "₯", "₰", "₱", "₲", "₳", "₴", "₵", "₸", "₺", "₼", "₾", "₿", "৳", "¤",
+    # ISO 4217 currency codes
+    "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM", "BBD", "BDT", "BGN", "BHD", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BTN", "BWP", "BYN", "BZD", "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CUC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD", "EGP", "ERN", "ETB", "EUR", "FJD", "FKP", "GBP", "GEL", "GGP", "GHS", "GIP", "GMD", "GNF", "GTQ", "GYD", "HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "IMP", "INR", "IQD", "IRR", "ISK", "JMD", "JOD", "JPY", "KES", "KGS", "KHR", "KMF", "KPW", "KRW", "KWD", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL", "LYD", "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRU", "MUR", "MVR", "MWK", "MXN", "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "OMR", "PAB", "PEN", "PGK", "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SBD", "SCR", "SDG", "SEK", "SGD", "SHP", "SLL", "SOS", "SPL", "SRD", "STN", "SVC", "SYP", "SZL", "THB", "TJS", "TMT", "TND", "TOP", "TRY", "TTD", "TVD", "TWD", "TZS", "UAH", "UGX", "USD", "UYU", "UZS", "VEF", "VES", "VND", "VUV", "WST", "XAF", "XAG", "XAU", "XCD", "XDR", "XOF", "XPD", "XPF", "XPT", "YER", "ZAR", "ZMW", "ZWD"
+    # Add more as needed
+]
+currency_regex = "|".join([re.escape(c) for c in CURRENCY_SYMBOLS_AND_CODES])
+
 
 def remove_links(soup: BeautifulSoup) -> BeautifulSoup:
     """
@@ -227,6 +236,7 @@ def _normalize_english(text: str) -> str:
 def _general_normalization(text: str) -> str:
     """
     Apply general text normalization for all languages.
+    Preserves URLs and image placeholders.
     
     Args:
         text (str): Text to normalize
@@ -234,6 +244,22 @@ def _general_normalization(text: str) -> str:
     Returns:
         str: Normalized text
     """
+    # Protect URLs and image placeholders from normalization
+    url_pattern = r'(https?://[^\s\]]+|[^\s\]]*\.[a-zA-Z]{2,}[^\s\]]*)'
+    image_pattern = r'(\[IMAGE:[^\]]+\])'
+    
+    protected_items = []
+    
+    def protect_item(match):
+        item = match.group(0)
+        placeholder = f"__PROTECTED_ITEM_{len(protected_items)}__"
+        protected_items.append(item)
+        return placeholder
+    
+    # Protect URLs and image placeholders
+    text = re.sub(url_pattern, protect_item, text)
+    text = re.sub(image_pattern, protect_item, text)
+    
     # Remove excessive whitespace
     text = re.sub(r'\n\s*\n\s*\n+', '\n\n', text)  # Multiple newlines to double newlines
     text = re.sub(r'[ \t]+', ' ', text)  # Multiple spaces/tabs to single space
@@ -244,63 +270,77 @@ def _general_normalization(text: str) -> str:
     # Remove common Unicode control characters
     text = re.sub(r'[\u00A0\u2000-\u200F\u2028-\u202F\u205F-\u206F\uFEFF]', ' ', text)
     
+    # Restore protected URLs and image placeholders
+    for i, item in enumerate(protected_items):
+        placeholder = f"__PROTECTED_ITEM_{i}__"
+        text = text.replace(placeholder, item)
+    
     return text.strip()
 
 
-def replace_images_with_text(soup: BeautifulSoup) -> BeautifulSoup:
+def replace_images_with_text(soup: BeautifulSoup, base_url: str = "") -> BeautifulSoup:
     """
     Replace images with text placeholders containing the alt text and src URL.
     This preserves image information in plain text format when keep_images=True.
-    
+
     Args:
         soup (BeautifulSoup): Parsed HTML document
-        
+        base_url (str): Base URL to prepend to relative URLs
+
     Returns:
         BeautifulSoup: Modified soup with images replaced by text placeholders
     """
+    def _normalize_image_url(url: str) -> str:
+        """Normalize URL by removing spaces and fixing common issues."""
+        if not url:
+            return ""
+        # Remove spaces from URLs (including before file extensions)
+        url = re.sub(r'\s+', '', url)
+        # Handle relative URLs
+        if base_url and not url.startswith(('http://', 'https://', '//')):
+            if url.startswith('/'):
+                # Absolute path
+                base_parts = base_url.split('/')
+                if len(base_parts) >= 3:
+                    url = '/'.join(base_parts[0:3]) + url
+            else:
+                # Relative path
+                base_for_relative = base_url
+                if not base_for_relative.endswith('/'):
+                    base_for_relative += '/'
+                url = base_for_relative + url
+        return url
+    
+    def _create_image_text(alt: str, title: str, src: str) -> str:
+        """Create standardized image text representation (URL only, no alt/title/caption)."""
+        src = _normalize_image_url(src)
+        return f"[IMAGE:{src}]"
+
+    # Extract CSS background images first
+    _extract_css_background_images(soup, base_url)
+
     # Replace img tags with text placeholders
     for img in soup.find_all('img'):
-        # Get image information
         src = img.get('src', '')
         alt = img.get('alt', '')
         title = img.get('title', '')
-        
-        # Create text representation
-        if alt and title:
-            image_text = f"[IMAGE: {alt} ({title}) - {src}]"
-        elif alt:
-            image_text = f"[IMAGE: {alt} - {src}]"
-        elif title:
-            image_text = f"[IMAGE: {title} - {src}]"
-        else:
-            image_text = f"[IMAGE: {src}]"
-        
-        # Replace the img tag with the text
+
+        image_text = _create_image_text(alt, title, src)
         img.replace_with(image_text)
-    
+
     # Handle picture tags and their content
     for picture in soup.find_all('picture'):
-        # Try to find the main image source
         img_tag = picture.find('img')
         if img_tag:
             src = img_tag.get('src', '')
             alt = img_tag.get('alt', '')
             title = img_tag.get('title', '')
-            
-            if alt and title:
-                image_text = f"[IMAGE: {alt} ({title}) - {src}]"
-            elif alt:
-                image_text = f"[IMAGE: {alt} - {src}]"
-            elif title:
-                image_text = f"[IMAGE: {title} - {src}]"
-            else:
-                image_text = f"[IMAGE: {src}]"
-            
+
+            image_text = _create_image_text(alt, title, src)
             picture.replace_with(image_text)
         else:
-            # Fallback if no img tag found
-            picture.replace_with("[IMAGE: picture element]")
-    
+            picture.replace_with("[IMAGE:picture-element]")
+
     # Handle figure tags that contain images
     for figure in soup.find_all('figure'):
         img_tag = figure.find('img')
@@ -308,24 +348,73 @@ def replace_images_with_text(soup: BeautifulSoup) -> BeautifulSoup:
             src = img_tag.get('src', '')
             alt = img_tag.get('alt', '')
             title = img_tag.get('title', '')
-            
+
             # Check for figcaption
             caption = figure.find('figcaption')
             if caption:
                 caption_text = caption.get_text().strip()
-                image_text = f"[IMAGE: {caption_text} - {src}]"
-            elif alt and title:
-                image_text = f"[IMAGE: {alt} ({title}) - {src}]"
-            elif alt:
-                image_text = f"[IMAGE: {alt} - {src}]"
-            elif title:
-                image_text = f"[IMAGE: {title} - {src}]"
+                src = _normalize_image_url(src)
+                image_text = f"[IMAGE:{caption_text}-{src}]"
             else:
-                image_text = f"[IMAGE: {src}]"
-            
+                image_text = _create_image_text(alt, title, src)
+
             figure.replace_with(image_text)
-    
+
     return soup
+
+
+def _extract_css_background_images(soup: BeautifulSoup, base_url: str = "") -> None:
+    """
+    Extract CSS background images and add them as text placeholders.
+    
+    Args:
+        soup (BeautifulSoup): Parsed HTML document
+        base_url (str): Base URL to prepend to relative URLs
+    """
+    def _normalize_bg_url(url: str) -> str:
+        """Normalize URL by removing spaces and fixing common issues."""
+        if not url:
+            return ""
+        
+        # Remove spaces from URLs
+        url = url.replace(' ', '')
+        
+        # Handle relative URLs
+        if base_url and not url.startswith(('http://', 'https://', '//')):
+            if url.startswith('/'):
+                # Absolute path
+                base_parts = base_url.split('/')
+                if len(base_parts) >= 3:
+                    url = '/'.join(base_parts[0:3]) + url
+            else:
+                # Relative path
+                base_for_relative = base_url
+                if not base_for_relative.endswith('/'):
+                    base_for_relative += '/'
+                url = base_for_relative + url
+        
+        return url
+    
+    # Find all elements with style attributes
+    for element in soup.find_all(attrs={'style': True}):
+        style = element.get('style', '')
+        
+        # Extract background-image URLs using regex
+        bg_matches = re.findall(r'background-image\s*:\s*url\s*\(\s*["\']?([^"\')\s]+)["\']?\s*\)', style, re.IGNORECASE)
+        
+        for bg_url in bg_matches:
+            normalized_url = _normalize_bg_url(bg_url)
+            # Get element text or tag name for context
+            element_text = element.get_text().strip()[:50] if element.get_text().strip() else element.name
+            
+            # Add background image as text
+            bg_text = f"[IMAGE:background-{element_text}-{normalized_url}]"
+            
+            # Insert the background image text at the beginning of the element
+            if element.string:
+                element.string = bg_text + " " + element.string
+            else:
+                element.insert(0, bg_text + " ")
 
 
 def clean_html_attributes(soup: BeautifulSoup) -> BeautifulSoup:
@@ -360,3 +449,27 @@ def clean_html_attributes(soup: BeautifulSoup) -> BeautifulSoup:
                 del element.attrs[attr]
     
     return soup
+
+
+def group_product_info(text: str) -> str:
+    """Group product/category/brand info into paragraphs based on repetitive patterns and any currency."""
+    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    product_cards = []
+    current_card = []
+    price_pattern = re.compile(
+        rf"(\d{{1,3}}(?:\.\d{{3}})*,\d{{2}}\s?(?:{currency_regex})?\s?\*?|ab\s?\d{{1,3}}(?:\.\d{{3}})*,\d{{2}}\s?(?:{currency_regex})?\s?\*?|Statt:\s?\d{{1,3}}(?:\.\d{{3}})*,\d{{2}}\s?(?:{currency_regex})?\s?\*?)"
+    )
+    last_was_price = False
+    for line in lines:
+        if price_pattern.search(line):
+            current_card.append(line)
+            last_was_price = True
+        else:
+            if last_was_price and current_card:
+                product_cards.append(' '.join(current_card))
+                current_card = []
+            current_card.append(line)
+            last_was_price = False
+    if current_card:
+        product_cards.append(' '.join(current_card))
+    return '\n\n'.join(product_cards)

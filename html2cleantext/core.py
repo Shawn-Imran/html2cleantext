@@ -8,14 +8,15 @@ from bs4 import BeautifulSoup
 from markdownify import markdownify
 from typing import Union, Optional
 
-from .utils import fetch_url, is_url, is_file_path, normalize_whitespace
+from .utils import fetch_url, is_url, is_file_path, normalize_whitespace, format_readable_text
 from .cleaners import (
     remove_links, 
     remove_images, 
     strip_boilerplate, 
     normalize_language,
     clean_html_attributes,
-    replace_images_with_text
+    replace_images_with_text,
+    group_product_info
 )
 
 logger = logging.getLogger(__name__)
@@ -27,7 +28,8 @@ def to_markdown(
     keep_images: bool = True, 
     remove_boilerplate: bool = True,
     normalize_lang: bool = True,
-    language: Optional[str] = None
+    language: Optional[str] = None,
+    readable_format: bool = True
 ) -> str:
     """
     Convert HTML to clean Markdown format.
@@ -39,6 +41,7 @@ def to_markdown(
         remove_boilerplate: Whether to remove navigation, footers, etc. (default: True)
         normalize_lang: Whether to apply language-specific normalization (default: True)
         language: Language code for normalization (auto-detected if None)
+        readable_format: Whether to format for human readability with proper paragraphs (default: True)
         
     Returns:
         str: Clean Markdown text
@@ -60,13 +63,21 @@ def to_markdown(
     # Apply cleaning options
     if remove_boilerplate:
         soup = strip_boilerplate(soup)
-    
+
     if not keep_links:
         soup = remove_links(soup)
-    
+    else:
+        # If keep_links is True, convert <a> tags to Markdown links [text](URL)
+        for a_tag in soup.find_all('a', href=True):
+            link_text = a_tag.get_text().strip()
+            link_url = a_tag['href']
+            # Replace with Markdown link format
+            replacement = f"[{link_text}]({link_url})" if link_text else f"[{link_url}]({link_url})"
+            a_tag.replace_with(replacement)
+
     if not keep_images:
         soup = remove_images(soup)
-    
+
     # Convert to Markdown
     markdown_text = markdownify(
         str(soup), 
@@ -79,7 +90,10 @@ def to_markdown(
         markdown_text = normalize_language(markdown_text, language)
     
     # Final cleanup
-    markdown_text = normalize_whitespace(markdown_text)
+    if readable_format:
+        markdown_text = format_readable_text(markdown_text)
+    else:
+        markdown_text = normalize_whitespace(markdown_text)
     
     return markdown_text
 
@@ -90,7 +104,8 @@ def to_text(
     keep_images: bool = False,
     remove_boilerplate: bool = True,
     normalize_lang: bool = True,
-    language: Optional[str] = None
+    language: Optional[str] = None,
+    readable_format: bool = True
 ) -> str:
     """
     Convert HTML to clean plain text format.
@@ -102,6 +117,7 @@ def to_text(
         remove_boilerplate: Whether to remove navigation, footers, etc. (default: True)
         normalize_lang: Whether to apply language-specific normalization (default: True)
         language: Language code for normalization (auto-detected if None)
+        readable_format: Whether to format for human readability with proper paragraphs (default: True)
         
     Returns:
         str: Clean plain text
@@ -123,28 +139,65 @@ def to_text(
     # Apply cleaning options
     if remove_boilerplate:
         soup = strip_boilerplate(soup)
-    
+
     if not keep_links:
         soup = remove_links(soup)
-    
+    else:
+        # If keep_links is True, replace <a> tags with their text and URL in [Link:URL] format
+        for a_tag in soup.find_all('a', href=True):
+            link_text = a_tag.get_text().strip()
+            link_url = a_tag['href']
+            if link_text:
+                replacement = f"{link_text} [Link:{link_url}]"
+            else:
+                replacement = f"[Link:{link_url}]"
+            a_tag.replace_with(replacement)
+
     # FIXED: Handle images properly based on keep_images flag
     if keep_images:
         # Replace images with text placeholders instead of removing them
-        soup = replace_images_with_text(soup)
+        # Extract base URL if input was a URL
+        base_url = ""
+        if is_url(str(html_input)):
+            base_url = str(html_input)
+
+        soup = replace_images_with_text(soup, base_url)
     else:
         # Remove images completely
         soup = remove_images(soup)
-    
-    # Extract text content
-    text = soup.get_text(separator=' ', strip=True)
+
+    # Extract text content with better paragraph preservation
+    if readable_format:
+        # Replace block elements with their text + appropriate newlines
+        block_elements = ['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote', 'article', 'section', 'br']
+        found_blocks = soup.find_all(block_elements)
+        
+        for tag in found_blocks:
+            if tag.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+                # Headers get double newlines before and after
+                tag.replace_with(f"\n\n{tag.get_text().strip()}\n\n")
+            elif tag.name in ['p', 'div', 'li', 'blockquote', 'article', 'section']:
+                # Paragraphs get newlines after
+                tag.replace_with(f"{tag.get_text().strip()}\n\n")
+            elif tag.name == 'br':
+                tag.replace_with("\n")
+        
+        text = soup.get_text(separator=' ', strip=True)
+    else:
+        text = soup.get_text(separator=' ', strip=True)
     
     # Apply language normalization
     if normalize_lang:
         text = normalize_language(text, language)
     
     # Final cleanup
-    text = normalize_whitespace(text)
-    
+    if readable_format:
+        text = format_readable_text(text)
+    else:
+        text = normalize_whitespace(text)
+    # Group product/category/brand info into paragraphs
+    text = group_product_info(text)
+
     return text
 
 

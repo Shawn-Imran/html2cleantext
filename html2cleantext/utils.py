@@ -155,3 +155,96 @@ def normalize_whitespace(text: str) -> str:
     import re
     normalized = re.sub(r'\s+', ' ', text.strip())
     return normalized
+
+
+def format_readable_text(text: str) -> str:
+    """
+    Format text for human readability with proper paragraphs and line breaks.
+    Preserves URLs and image placeholders without adding spaces.
+    
+    Args:
+        text (str): Text to format
+        
+    Returns:
+        str: Human-readable formatted text with proper paragraphs
+    """
+    if not text:
+        return ""
+    
+    import re
+    
+    # First, protect URLs and image placeholders from space normalization
+    url_pattern = r'(https?://[^\s\]]+|[^\s\]]*\.[a-zA-Z]{2,}[^\s\]]*)'
+    image_pattern = r'(\[IMAGE:[^\]]+\])'
+    
+    # Find all URLs and image placeholders
+    protected_items = []
+    
+    def protect_item(match):
+        item = match.group(0)
+        placeholder = f"__PROTECTED_ITEM_{len(protected_items)}__"
+        protected_items.append(item)
+        return placeholder
+    
+    # Protect URLs and image placeholders
+    text = re.sub(url_pattern, protect_item, text)
+    text = re.sub(image_pattern, protect_item, text)
+    
+    # Now do normal text processing
+    # Replace multiple spaces/tabs with single space
+    text = re.sub(r'[ \t]+', ' ', text)
+    
+    # Convert single newlines within paragraphs to spaces, but preserve double newlines
+    lines = text.split('\n')
+    processed_lines = []
+    
+    for i, line in enumerate(lines):
+        line = line.strip()
+        if not line:  # Empty line
+            processed_lines.append('')
+        else:
+            # Check if this line should be merged with the previous one
+            if (processed_lines and 
+                processed_lines[-1] and  # Previous line is not empty
+                not line[0].isupper() and  # Current line doesn't start with capital
+                not processed_lines[-1].endswith('.') and  # Previous line doesn't end with period
+                not processed_lines[-1].endswith('!') and  # Previous line doesn't end with exclamation
+                not processed_lines[-1].endswith('?') and  # Previous line doesn't end with question mark
+                not processed_lines[-1].endswith(':') and  # Previous line doesn't end with colon
+                len(processed_lines[-1]) > 20):  # Previous line is substantial
+                # Merge with previous line
+                processed_lines[-1] += ' ' + line
+            else:
+                processed_lines.append(line)
+    
+    text = '\n'.join(processed_lines)
+    
+    # Normalize line breaks - convert multiple newlines to paragraph breaks
+    text = re.sub(r'\n\s*\n\s*\n+', '\n\n', text)
+    
+    # Split into paragraphs and clean each one
+    paragraphs = text.split('\n\n')
+    cleaned_paragraphs = []
+    
+    for paragraph in paragraphs:
+        paragraph = paragraph.strip()
+        if paragraph:  # Only keep non-empty paragraphs
+            # Ensure sentences are properly spaced (but avoid URLs)
+            paragraph = re.sub(r'\.(\w)', r'. \1', paragraph)  # Add space after period if missing
+            paragraph = re.sub(r'\?(\w)', r'? \1', paragraph)  # Add space after question mark
+            paragraph = re.sub(r'!(\w)', r'! \1', paragraph)   # Add space after exclamation
+            
+            # Remove excessive spaces within the paragraph (but preserve protected items)
+            paragraph = re.sub(r' +', ' ', paragraph)
+            
+            cleaned_paragraphs.append(paragraph)
+    
+    # Join paragraphs with double newlines for clear separation
+    result = '\n\n'.join(cleaned_paragraphs)
+    
+    # Restore protected URLs and image placeholders
+    for i, item in enumerate(protected_items):
+        placeholder = f"__PROTECTED_ITEM_{i}__"
+        result = result.replace(placeholder, item)
+    
+    return result.strip()

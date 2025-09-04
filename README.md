@@ -34,9 +34,9 @@ pip install -e .
 import html2cleantext
 
 # From HTML string
-html = "<h1>Hello World</h1><p>This is a test.</p>"
-markdown = html2cleantext.to_markdown(html)
-text = html2cleantext.to_text(html)
+html = "<h1>Hello World</h1><p>This is a test with a <a href='https://example.com'>link</a>.</p>"
+markdown = html2cleantext.to_markdown(html)  # Output: ... [link](https://example.com) ...
+text = html2cleantext.to_text(html, keep_links=True)  # Output: ... link [Link:https://example.com] ...
 
 # From file
 markdown = html2cleantext.to_markdown("page.html")
@@ -47,7 +47,7 @@ markdown = html2cleantext.to_markdown("https://example.com")
 # With options
 clean_text = html2cleantext.to_text(
     html,
-    keep_links=False,
+    keep_links=True,  # Use [Link:URL] format in plain text
     keep_images=False,
     remove_boilerplate=True
 )
@@ -56,11 +56,11 @@ clean_text = html2cleantext.to_text(
 ### Command Line Interface
 
 ```bash
-# Convert to Markdown (default)
+# Convert to Markdown (default, links as [text](URL))
 html2cleantext input.html
 
-# Convert to plain text
-html2cleantext input.html --mode text
+# Convert to plain text (links as [Link:URL])
+html2cleantext input.html --mode text --keep-links
 
 # From URL
 html2cleantext https://example.com --output clean.md
@@ -127,6 +127,13 @@ optional arguments:
   --verbose, -v         Enable verbose logging
 ```
 
+## Link Output Format
+
+- **Markdown output**: Links are converted to standard Markdown format `[text](URL)` for compatibility with Markdown renderers.
+- **Plain text and CLI output**: Links are converted to `[Link:URL]` format (e.g., `My Link [Link:https://example.com]`) for easy parsing and clear distinction from other text.
+
+---
+
 ## Examples
 
 ### Basic Usage
@@ -142,7 +149,7 @@ html = """
     <nav>Navigation menu</nav>
     <main>
         <h1>Main Title</h1>
-        <p>This is the main content with a <a href="https://example.com">link</a>.</p>
+        <p>This is the main content with a <a href=\"https://example.com\">link</a>.</p>
         <ul>
             <li>Item 1</li>
             <li>Item 2</li>
@@ -153,58 +160,35 @@ html = """
 </html>
 """
 
-result = html2cleantext.to_markdown(html)
-print(result)
-```
-
-Output:
-```markdown
+result_md = html2cleantext.to_markdown(html)
+print(result_md)
+# Output:
 # Main Title
+#
+# This is the main content with a [link](https://example.com).
+#
+# * Item 1
+# * Item 2
 
-This is the main content with a [link](https://example.com).
-
-* Item 1
-* Item 2
-```
-
-### Advanced Usage
-
-```python
-import html2cleantext
-# Process a Bengali webpage
-bengali_html = "<p>এই একটি বাংলা বাক্য।</p>"
-clean_text = html2cleantext.to_text(
-    bengali_html,
-    language='bn',
-    normalize_lang=True
-)
-
-# Batch processing
-import glob
-
-for html_file in glob.glob("*.html"):
-    markdown_file = html_file.replace('.html', '.md')
-    with open(markdown_file, 'w') as f:
-        f.write(html2cleantext.to_markdown(html_file))
+result_txt = html2cleantext.to_text(html, keep_links=True)
+print(result_txt)
+# Output:
+# Main Title
+#
+# This is the main content with a link [Link:https://example.com].
+#
+# Item 1
+# Item 2
 ```
 
 ### Command Line Examples
 
 ```bash
-# Basic conversion
+# Basic conversion (Markdown, links as [text](URL))
 html2cleantext index.html > clean.md
 
-# Process URL and save to file
-html2cleantext https://news.example.com/article --output article.md
-
-# Plain text with no links/images
-html2cleantext complex.html --mode text --no-links --no-images
-
-# Preserve all content (no cleaning)
-html2cleantext raw.html --no-remove_boilerplate --output raw_content.md
-
-# Bengali content with specific language
-html2cleantext bengali.html --language bn --mode text
+# Plain text with links as [Link:URL]
+html2cleantext index.html --mode text --keep-links > clean.txt
 ```
 
 ## Language Support
