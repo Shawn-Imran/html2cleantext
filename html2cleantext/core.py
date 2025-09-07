@@ -59,7 +59,7 @@ def to_markdown(
     
     # Clean HTML attributes first
     soup = clean_html_attributes(soup)
-    
+
     # Apply cleaning options
     if remove_boilerplate:
         soup = strip_boilerplate(soup)
@@ -140,19 +140,6 @@ def to_text(
     if remove_boilerplate:
         soup = strip_boilerplate(soup)
 
-    if not keep_links:
-        soup = remove_links(soup)
-    else:
-        # If keep_links is True, replace <a> tags with their text and URL in [Link:URL] format
-        for a_tag in soup.find_all('a', href=True):
-            link_text = a_tag.get_text().strip()
-            link_url = a_tag['href']
-            if link_text:
-                replacement = f"{link_text} [Link:{link_url}]"
-            else:
-                replacement = f"[Link:{link_url}]"
-            a_tag.replace_with(replacement)
-
     # FIXED: Handle images properly based on keep_images flag
     if keep_images:
         # Replace images with text placeholders instead of removing them
@@ -166,12 +153,29 @@ def to_text(
         # Remove images completely
         soup = remove_images(soup)
 
+    if not keep_links:
+        soup = remove_links(soup)
+    else:
+        # If keep_links is True, replace <a> tags with their text and URL in [Link:URL] format
+        for a_tag in soup.find_all('a', href=True):
+            link_text = a_tag.get_text().strip()
+            link_url = a_tag['href']
+            if link_text:
+                replacement = f"{link_text} [Link:{link_url}]"
+            else:
+                replacement = f"[Link:{link_url}]"
+            a_tag.replace_with(replacement)
+
+    # image_urls = [img.get("src") for img in soup.find_all("img") if img.get("src")]
+    # for url in image_urls:
+    #     print(url)
+
     # Extract text content with better paragraph preservation
     if readable_format:
         # Replace block elements with their text + appropriate newlines
         block_elements = ['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote', 'article', 'section', 'br']
         found_blocks = soup.find_all(block_elements)
-        
+
         for tag in found_blocks:
             if tag.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
                 # Headers get double newlines before and after
@@ -181,7 +185,7 @@ def to_text(
                 tag.replace_with(f"{tag.get_text().strip()}\n\n")
             elif tag.name == 'br':
                 tag.replace_with("\n")
-        
+
         text = soup.get_text(separator=' ', strip=True)
     else:
         text = soup.get_text(separator=' ', strip=True)

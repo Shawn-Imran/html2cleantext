@@ -75,7 +75,7 @@ def strip_boilerplate(soup: BeautifulSoup, use_readability: bool = True) -> Beau
     Args:
         soup (BeautifulSoup): Parsed HTML document
         use_readability (bool): Whether to use readability-lxml for content extraction
-        
+
     Returns:
         BeautifulSoup: Modified soup with boilerplate removed
     """
@@ -91,14 +91,14 @@ def strip_boilerplate(soup: BeautifulSoup, use_readability: bool = True) -> Beau
             soup = _manual_boilerplate_removal(soup)
     else:
         soup = _manual_boilerplate_removal(soup)
-    
+
     return soup
 
 
 def _manual_boilerplate_removal(soup: BeautifulSoup) -> BeautifulSoup:
     """
     Manually remove common boilerplate elements.
-    
+
     Args:
         soup (BeautifulSoup): Parsed HTML document
         
@@ -126,25 +126,25 @@ def _manual_boilerplate_removal(soup: BeautifulSoup) -> BeautifulSoup:
     for selector in boilerplate_selectors:
         for element in soup.select(selector):
             element.decompose()
-    
+
     # Remove elements by common attributes
     for element in soup.find_all(attrs={'role': ['navigation', 'banner', 'contentinfo', 'complementary']}):
         element.decompose()
-    
+
     # Remove script and style tags
     for script in soup.find_all(['script', 'style', 'noscript']):
         script.decompose()
     
     # Remove elements with low text-to-html ratio (likely boilerplate)
     _remove_low_content_elements(soup)
-    
+
     return soup
 
 
 def _remove_low_content_elements(soup: BeautifulSoup, threshold: float = 0.3) -> None:
     """
     Remove elements that have a low text-to-HTML ratio, indicating they're likely boilerplate.
-    
+
     Args:
         soup (BeautifulSoup): Parsed HTML document
         threshold (float): Minimum text-to-HTML ratio to keep an element
@@ -325,6 +325,7 @@ def replace_images_with_text(soup: BeautifulSoup, base_url: str = "") -> Beautif
         alt = img.get('alt', '')
         title = img.get('title', '')
 
+        # print("image: ", src)
         image_text = _create_image_text(alt, title, src)
         img.replace_with(image_text)
 
@@ -429,25 +430,25 @@ def clean_html_attributes(soup: BeautifulSoup) -> BeautifulSoup:
     """
     # Attributes to keep for semantic meaning
     keep_attributes = ['href', 'src', 'alt', 'title', 'colspan', 'rowspan']
-    
+
     for element in soup.find_all(True):  # Find all tags
         if hasattr(element, 'attrs'):
             # Remove style attributes
             if 'style' in element.attrs:
                 del element.attrs['style']
-            
+
             # Remove class and id attributes (usually for styling)
             if 'class' in element.attrs:
                 del element.attrs['class']
             if 'id' in element.attrs:
                 del element.attrs['id']
-            
+
             # Remove other attributes not in keep list
-            attrs_to_remove = [attr for attr in element.attrs.keys() 
+            attrs_to_remove = [attr for attr in element.attrs.keys()
                              if attr not in keep_attributes]
             for attr in attrs_to_remove:
                 del element.attrs[attr]
-    
+
     return soup
 
 
