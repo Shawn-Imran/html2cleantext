@@ -7,7 +7,7 @@ boilerplate removal, language-specific normalization, and flexible output format
 
 from .core import to_markdown, to_text
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 __author__ = "Md Al Mahmud Imran"
 __email__ = "md.almahmudimran@gmail.com"
 
