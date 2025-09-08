@@ -314,7 +314,7 @@ def replace_images_with_text(soup: BeautifulSoup, base_url: str = "") -> Beautif
     def _create_image_text(alt: str, title: str, src: str) -> str:
         """Create standardized image text representation (URL only, no alt/title/caption)."""
         src = _normalize_image_url(src)
-        return f"[IMAGE:{src}]"
+        return f"[IMAGE:{src} | alt={alt} | title={title}]"
 
     # Extract CSS background images first
     _extract_css_background_images(soup, base_url)
